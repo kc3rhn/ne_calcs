@@ -138,7 +138,7 @@ def radCalc(filepath):
 def radCalcarray(filepath):	
 	#print("Isotope,A,Z,Excess Mass,BE,BE/a")
 	
-	filepath2="/home/pyne-user/necalcs/output/output.csv"
+	filepath2="/home/pyne-user/PycharmProjects/ne_calcs/output/output.csv"
 	out = open(filepath2, 'w')
 
 	
@@ -202,4 +202,4 @@ def plotData(filepath):
 		plt.show()
 		
 radCalcarray('input.csv')
-plotData("/home/pyne-user/necalcs/output/output.csv")
+plotData("/home/pyne-user/PycharmProjects/ne_calcs/output/output.csv")
