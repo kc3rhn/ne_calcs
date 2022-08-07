@@ -4,6 +4,7 @@ import matplotlib as plt
 import csv
 from matplotlib import pyplot as plt
 
+
 # Subatomic Particle Masses in AMU
 # 
 electronMass = 0.00054858
@@ -12,6 +13,9 @@ protonMass = 1.007825
 
 # Speed of Light in m/s
 lightSpeed = 299792500
+
+# (A)MU to (M)eV (C)onversion (F)actor
+amcf = 931.494893
 
 # Z: number of protons in the nucleus of a given element
 def z(isotope):
@@ -32,7 +36,7 @@ def massDefect(isotope):
 	return z(isotope)*protonMass + neutCount(isotope)*neutronMass - data.atomic_mass(isotope)
 
 def bindingEnergy(isotope):
-	return (massDefect(isotope))*931.494893	
+	return (massDefect(isotope))*amcf
 	
 def bindingEnergyPerNucleon(isotope):
 	return bindingEnergy(isotope)/a(isotope)
@@ -75,9 +79,9 @@ def semiEmpiricalBindingEnergy(isotope):
 	term1 = a_volume*nuc
 	term2 = a_surface*(pow(nuc,(2/3)))
 	term3 = a_coulomb*(p*(p - 1))/(pow(nuc,(1/3)))
+
 	term4 = a_asymmetry*(pow((neu - p),2)/nuc)
-	#term5 = 0
-	
+
 	p_pairing = (p % 2)
 	n_pairing = (neu % 2)
 	
@@ -87,13 +91,15 @@ def semiEmpiricalBindingEnergy(isotope):
 	if (n_pairing == 0) != (p_pairing == 0):
 		term5 = 0
 	
-	if (n_pairing > 0) and (p_pairing > 0):
-		term5 = -a_pairing/pow(nuc, 0.5)
+	if (n_pairing != 0) and (p_pairing != 0):
+		term5 = 0 - (a_pairing/pow(nuc, 0.5))
 		
 	mass = term1 - term2 - term3 - term4 + term5
 	
 	return mass
 
+# (S)emi-(E)mpirical (M)ass (F)ormula (semf)
+#
 def semf(isotope):
 	
 	p = z(isotope)
@@ -106,7 +112,6 @@ def semf(isotope):
 	semi = term1 + term2 - term3
 	
 	return semi
-	
 
 def BindingEnergyFromMassExcess(a, z, me):
 	term1 = z*(protonMass - neutronMass)
@@ -144,7 +149,6 @@ def radCalcarray(filepath):
 	
 	with open(filepath, 'r') as f:
 		
-		
 		writer = csv.writer(out)
 		header = ['Isotope', 'A', 'Z', 'Excess Mass', 'BE', 'BE/a']
 		writer.writerow(header)
@@ -155,6 +159,8 @@ def radCalcarray(filepath):
 		for column in reader:
 		
 			i = column[0]
+			# print(i)
+			# print(nucname.id(i))
 			em = float(column[1])
 			be = BindingEnergyFromMassExcess(a(nucname.id(i)), z(nucname.id(i)), em) 
 			be_per_n = be/a(nucname.id(i))
@@ -162,8 +168,8 @@ def radCalcarray(filepath):
 			datarow = [i, a(nucname.id(i)), z(nucname.id(i)), em, be, be_per_n]
 			writer.writerow(datarow)
 
-			#print("z: ", z(nucname.id(i)), "a: ", a(nucname.id(i)))
-			#print (i,",",a(nucname.id(i)),",",z(nucname.id(i)),",",em, ",",be,",",be_per_n)
+			# print("z: ", z(nucname.id(i)), "a: ", a(nucname.id(i)))
+			# print (i,",",a(nucname.id(i)),",",z(nucname.id(i)),",",em, ",",be,",",be_per_n)
 		
 			
 	f.close()
@@ -185,6 +191,7 @@ def plotData(filepath):
 			an = float(row[1])
 			emn = float(row[3])
 			errorn = float(row[4]) - semiEmpiricalBindingEnergy(nucname.id(row[0]))
+			#print(errorn)
 			beperan = float(row[5])
 			
 			a_number.append(an)
@@ -192,14 +199,15 @@ def plotData(filepath):
 			be_per_a.append(beperan)
 			errorlist.append(errorn)
 						
-		#plt.plot(a_number,excess_mass,marker='o')
-		#plt.show()
-		
-		#plt.plot(a_number,be_per_a,marker='o')
-		#plt.show()
+		# plt.plot(a_number,excess_mass,marker='o')
+		# plt.show()
+		#
+		# plt.plot(a_number,be_per_a,marker='o')
+		# plt.show()
 		
 		plt.plot(a_number,errorlist, marker='o')
 		plt.show()
-		
+
+
 radCalcarray('input.csv')
 plotData("/home/pyne-user/PycharmProjects/ne_calcs/output/output.csv")
